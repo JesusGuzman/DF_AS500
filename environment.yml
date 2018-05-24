@@ -1,0 +1,17 @@
+#https://anaconda.org/Quantopian/ta-lib
+# https://github.com/mrjbq7/ta-lib/issues/156
+#anaconda-project init
+name: db
+channels:
+- defaults
+- quantopian
+dependencies:
+- python=3.5
+- ta-lib=0.4.9
+- jupyter
+- pip
+- pip:
+  - numpy==1.14.3
+  - pandas==0.22.0
+  - matplotlib==2.2.2
+  - plotly==2.5.1
