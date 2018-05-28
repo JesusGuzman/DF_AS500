@@ -57,6 +57,63 @@ def get_index(df):
             news_rows.append({'index': index, 'num': minutes-1})
     return news_rows
 
+#==========================================================================
+def create_df_complete(df, news_rows): #agregamos la primer barra
+    indexs = []
+    num_rows = []
+    
+    for key in news_rows:
+        indexs.append(key['index'])
+        num_rows.append(key['num'])
+        
+    
+    
+    df_final = pd.DataFrame(columns=['Date',          'Timestamp', 'Ticker',     'OpenPrice',
+                                     'HighPrice',     'LowPrice',  'ClosePrice', 'TotalVolume', 
+                                     'TotalQuantity', 'TotalTradeCount'])
+    
+    
+
+    key = 0
+    ind = 0
+    while key <= len(df):
+        if ind == len(num_rows):
+            ndf = df[key:]
+            df_final = df_final.append(ndf,ignore_index=True)
+            break
+        else:
+            ndf = df[key:indexs[ind]+1]
+            conta = 0
+            array = []
+            while conta<num_rows[ind]:
+            
+                stock = { 'Date':   df[df.columns[0]][indexs[ind]], 
+                          'Timestamp': (parse_time(df[df.columns[1]][indexs[ind]]) + timedelta(minutes=conta+1)).strftime('%H:%M:%S'),
+                          'Ticker': ndf[ndf.columns[2]][indexs[ind]],     'OpenPrice': ndf[ndf.columns[3]][indexs[ind]], 
+                          'HighPrice': ndf[ndf.columns[4]][indexs[ind]],  'LowPrice': ndf[ndf.columns[5]][indexs[ind]],
+                          'ClosePrice': ndf[ndf.columns[6]][indexs[ind]], 'TotalVolume': 0,
+                          'TotalQuantity': 0,                             'TotalTradeCount': 0 }
+                
+                array.append(stock)
+                conta = conta + 1
+                
+            df_stock = pd.DataFrame(array)
+                
+            df_final = df_final.append( [ndf,df_stock] ,ignore_index=True)
+                
+            key = indexs[ind]+1 #key + indexs[ind]+1
+            ind = ind + 1
+            
+        
+    
+    df_final = df_final[['Date',          'Timestamp', 'Ticker',     'OpenPrice',
+                             'HighPrice',     'LowPrice',  'ClosePrice', 'TotalVolume', 
+                             'TotalQuantity', 'TotalTradeCount']]
+    #df_final = df_final.append( [ndf,df_stock] ,ignore_index=True)
+    #df_final.to_csv('./emisoras/All-Complete-Ticker-Data/test.csv', encoding='utf-8', index=False)
+    return df_final
+
+#==========================================================================
 #Funcion que agrega las filas faltante y crea un nuevo DF
 def create_df(df, news_rows):
     indexs = []
@@ -99,7 +156,7 @@ def complete_data(tickers):
         df = pd.DataFrame(file)    
         index = get_index(df)
         if len(index)>0:
-            new_df = create_df(df, index)
+            new_df = create_df_complete(df, index)
             new_df.to_csv('./emisoras/All-Complete-Ticker-Data/'+ticker, encoding='utf-8', index=False)
         else:
             df.to_csv('./emisoras/All-Complete-Ticker-Data/'+ticker, encoding='utf-8', index=False)
